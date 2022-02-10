@@ -1,23 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_lstlast.c                                       :+:      :+:    :+:   */
+/*   operations_utils.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: abarchil <abarchil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/10/17 16:19:31 by abarchil          #+#    #+#             */
-/*   Updated: 2021/12/19 19:13:05 by abarchil         ###   ########.fr       */
+/*   Created: 2022/01/16 16:40:19 by abarchil          #+#    #+#             */
+/*   Updated: 2022/02/10 07:40:33 by abarchil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
 
-t_export	*ft_lstlast(t_export *lst)
+void	and_or_operation(t_cmd *cmd, t_env *export, t_pipe *pipe_, char **env)
 {
-	if (lst)
+	char	*command;
+
+	pipe_->pid = fork();
+	if (pipe_->pid == 0)
 	{
-		while (lst->next != NULL)
-			lst = lst->next;
+		command = ft_check_excute(cmd, env);
+		if (!check_if_builting(cmd->command) && cmd->next)
+			exit(check_command(cmd, export));
+		check_command_error(cmd, export, command, env);
 	}
-	return (lst);
+	else
+		wait(&g_tools.exit_status);
 }

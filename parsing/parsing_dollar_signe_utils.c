@@ -1,33 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strndup.c                                       :+:      :+:    :+:   */
+/*   parsing_dollar_signe_utils.c                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: abarchil <abarchil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/12/23 19:40:00 by abarchil          #+#    #+#             */
-/*   Updated: 2021/12/23 19:40:34 by abarchil         ###   ########.fr       */
+/*   Created: 2022/01/16 17:35:11 by abarchil          #+#    #+#             */
+/*   Updated: 2022/01/16 17:36:40 by abarchil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
 
-char	*ft_strndup(const char *s, int n)
+void	free_dollar_sign_utils(int index, t_cmd *cmd, char *tmp_arg, char **var)
 {
-	char	*dest;
-	char	*src;
-	int		count;
+	int	i;
 
-	count = 0;
-	src = (char *)s;
-	dest = (char *)malloc(sizeof(const char) * n + 1);
-	if (!dest)
-		return (NULL);
-	while (count < n)
-	{
-		dest[count] = src[count];
-		count++;
-	}
-	dest[count] = '\0';
-	return (dest);
+	i = -1;
+	free(cmd->arguments[index]);
+	cmd->arguments[index] = ft_strdup(tmp_arg);
+	free(tmp_arg);
+	i = -1;
+	while (var[++i])
+		cmd->arguments[index] = ft_strjoin(cmd->arguments[index], var[i]);
+	ft_free_env(var);
 }

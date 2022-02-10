@@ -5,117 +5,72 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: abarchil <abarchil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/05 07:16:33 by fel-boua          #+#    #+#             */
-/*   Updated: 2022/01/07 03:31:38 by abarchil         ###   ########.fr       */
+/*   Created: 2022/01/10 18:06:15 by atouhami          #+#    #+#             */
+/*   Updated: 2022/02/10 08:46:41 by abarchil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
 
-char	*lexing(char *command, int **lampe)
+int	check_types_two(t_tokens *list)
 {
-	int	count;
-
-	count = 0;
-	while (command[count])
+	while (list->next)
 	{
-		if (command[count] == '|' && !lampe[0][1] && !lampe[0][2])
-			command[count] = PIPE;
-		else if (command[count] == '>' && command[count + 1] == '>'
-			&& !lampe[0][1] && !lampe[0][2])
+		if (list && list->type >= 2)
 		{
-			set_ro_app_quotes(command, count);
-			count++;
+			if ((list->next && list->next->type >= 2)
+				&& (list->next && list->next->type != list->type))
+				return (printf("parse error\n"), 1);
 		}
-		else if (command[count] == '<' && command[count + 1] == '<'
-			&& !lampe[0][1] && !lampe[0][2])
-		{
-			set_here_doc_quotes(command, count);
-			count++;
-		}
-		else
-			lexing_2(command, count, lampe);
-		count++;
+		if (list && list->type == AND)
+			if ((list->next && list->next->type != AND)
+				&& (list->previous && list->previous->type != AND))
+				return (printf("parse error near '&'\n"), 1);
+		if (list->str[ft_strlen(list->str) - 1] == ';'
+			&& list->str[ft_strlen(list->str) - 2] == ';')
+			return (printf("parse error near ';;'\n"), 1);
+		list = list->next;
 	}
-	return (command);
-}
-
-int	lexing_first_char(char *command)
-{
-	if (command[0] == PIPE)
-	{
-		printf("syntax error near unexpected token `|'\n");
-		return (0);
-	}
-	else if ((command[0] < 0 && command[0] > -6) && ft_strlen(command) == 1)
-	{
-		printf("syntax error near unexpected token `newline'\n");
-		return (0);
-	}
-	return (1);
-}
-
-int	lexing_last_char(char *command)
-{
-	int	size;
-
-	size = ft_strlen(command) - 1;
-	while (command[size] == DELIMITER)
-		size--;
-	if (command[size] < 0 && command[size] > -6)
-	{
-		printf("parse error near \'\\n\'\n");
-		return (0);
-	}
-	return (1);
-}
-
-int	check_lexing_syntax(char *command)
-{
-	int		count;
-	int		checker;
-
-	count = 0;
-	checker = 0;
-	if (!lexing_first_char(command) || !check_quotes(command))
-		return (-1);
-	while (command[count])
-	{
-		while (command[count] && command[count] != DELIMITER)
-			count++;
-		checker = count - 1;
-		while (command[count] && command[count] == DELIMITER)
-			count++;
-		if (command[checker] < 0 && command[checker] > -8
-			&& (command[count] < 0 && command[count] > -8))
-		{
-			printf("syntax error near unexpected token\n");
-			return (-1);
-		}
-		count++;
-	}
-	if (!lexing_last_char(command))
-		return (-1);
 	return (0);
 }
 
-int	check_quotes(char *command)
+void	define_next_operation(t_tokens *list, t_cmd *cmd)
 {
-	int		count;
-	int		quotes_num;
+	cmd->next_operation = OP_NONE;
+	if (cmd->previous && list->previous && list->previous->previous
+		&& list->previous->type == PIPE
+		&& list->previous->previous->type == PIPE)
+		cmd->previous->next_operation = OP_OR;
+	else if (cmd->previous && list->previous && list->previous->type == PIPE)
+		cmd->previous->next_operation = OP_PIPE;
+	else if (cmd->previous && list->previous && list->previous->type == AND)
+		cmd->previous->next_operation = OP_AND;
+}
 
-	count = 0;
-	quotes_num = 0;
-	while (command[count])
+void	set_to_value(int *i, int *f_nb)
+{
+	*i = 1;
+	*f_nb = 0;
+}
+
+void	take_command(char *str, t_env *env)
+{
+	while (*str == ' ')
+		str++;
+	if (verify_errors(str) || !str[0] || !lexer(str, env))
+		return ;
+}
+
+int	count_elements(t_tokens *list, int element)
+{
+	int	i;
+
+	i = 0;
+	while (list->type != PIPE && list->type != AND && list->next)
 	{
-		if (command[count] == DOUBLE_QUOTES || command[count] == SINGLE_QUOTES)
-			quotes_num++;
-		count++;
+		if (list->type == element)
+			i++;
+		list = list-> next;
 	}
-	if ((quotes_num % 2) == 1)
-	{
-		printf("quotes error!\n");
-		return (0);
-	}
-	return (1);
+	return (i);
 }

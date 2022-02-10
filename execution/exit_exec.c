@@ -6,11 +6,23 @@
 /*   By: abarchil <abarchil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/01 07:58:13 by abarchil          #+#    #+#             */
-/*   Updated: 2022/01/07 04:46:08 by abarchil         ###   ########.fr       */
+/*   Updated: 2022/01/13 14:29:25 by abarchil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
+
+int	ft_strlen_2d(char **s)
+{
+	int	i;
+
+	i = 0;
+	if (!s)
+		return (0);
+	while (s[i])
+		i++;
+	return (i);
+}
 
 int	ft_isnumber(char *number)
 {
@@ -30,19 +42,19 @@ int	ft_isnumber(char *number)
 
 int	ft_exit(t_cmd *cmd)
 {
-	if (!cmd || ft_strlen_2d(cmd->args) == 1)
+	if (!cmd || ft_strlen_2d(cmd->arguments) == 1)
 	{
 		ft_putstr_fd("exit\n", 1);
 		exit(0);
 	}
-	if (ft_strlen_2d(cmd->args) > 2)
+	if (ft_strlen_2d(cmd->arguments) > 2)
 		ft_putstr_fd("exit: too many arguments\n", 1);
-	else if (!ft_isnumber(cmd->args[1]))
+	else if (!ft_isnumber(cmd->arguments[1]))
 	{
-		printf("exit: %s: numeric argument required\n", cmd->args[1]);
+		printf("exit: %s: numeric argument required\n", cmd->arguments[1]);
 		exit(255);
 	}
 	else
-		exit(ft_atoi(cmd->args[1]));
+		exit(ft_atoi(cmd->arguments[1]));
 	exit(0);
 }

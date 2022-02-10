@@ -6,15 +6,15 @@
 /*   By: abarchil <abarchil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/04 21:52:15 by abarchil          #+#    #+#             */
-/*   Updated: 2021/12/19 16:59:40 by abarchil         ###   ########.fr       */
+/*   Updated: 2022/01/13 15:09:52 by abarchil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
 
-void	*ft_memcpy(void *dest, const void *src, size_t n)
+void	*ft_memcpy(void *dest, const void *src, int n)
 {
-	size_t			count;
+	int				count;
 	unsigned char	*dest1;
 	unsigned char	*src1;
 

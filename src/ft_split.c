@@ -6,13 +6,32 @@
 /*   By: abarchil <abarchil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/06 14:55:52 by abarchil          #+#    #+#             */
-/*   Updated: 2022/01/02 03:18:17 by abarchil         ###   ########.fr       */
+/*   Updated: 2022/01/13 15:19:54 by abarchil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
 
-void	*ft_memzero(size_t size)
+char	*ft_strjoin_2(char const *s1, char const *s2)
+{
+	char		*s;
+	int			s1len;
+	int			s2len;
+
+	if (s1 == NULL || s2 == NULL)
+		return (NULL);
+	s1len = ft_strlen((char *)s1);
+	s2len = ft_strlen((char *)s2);
+	s = malloc((s1len + s2len) * sizeof(char));
+	if (s == NULL)
+		return (printf("failed allocation"), exit(1), NULL);
+	ft_memmove(s, s1, s1len);
+	ft_memmove(&s[s1len], s2, s2len);
+	s[s1len + s2len] = '\0';
+	return (s);
+}
+
+static void	*ft_memzero(int size)
 {
 	char	*dest;
 	int		count;
@@ -29,10 +48,10 @@ void	*ft_memzero(size_t size)
 		return (dest);
 	}
 	else
-		return (NULL);
+		return (printf("failed allocation"), exit(1), NULL);
 }
 
-int	word_length(char const *s, char c)
+static int	word_length(char const *s, char c)
 {
 	int	len;
 
@@ -61,7 +80,7 @@ char	**ft_split(char const *s, char c)
 		return (NULL);
 	splited = (char **)malloc(sizeof(char *) * word_length(s, c));
 	if (!splited)
-		return (NULL);
+		return (printf("failed allocation"), exit(1), NULL);
 	j = 0;
 	while (*s != 0)
 	{

@@ -6,11 +6,11 @@
 /*   By: abarchil <abarchil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/02 01:16:48 by abarchil          #+#    #+#             */
-/*   Updated: 2022/01/07 21:31:01 by abarchil         ###   ########.fr       */
+/*   Updated: 2022/01/17 10:54:24 by abarchil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
 
 int	check_if_builting(char *command)
 {
@@ -33,7 +33,7 @@ int	check_if_builting(char *command)
 		return (-1);
 }
 
-int	check_command(t_cmd *cmd, t_export *export)
+int	check_command(t_cmd *cmd, t_env *export)
 {
 	if (cmd->command)
 	{
@@ -42,7 +42,7 @@ int	check_command(t_cmd *cmd, t_export *export)
 			return (ft_echo(cmd));
 		else if (!ft_strcmp(cmd->command, "pwd")
 			|| !ft_strcmp(cmd->command, "PWD"))
-			return (ft_pwd(cmd, export));
+			return (ft_pwd(cmd));
 		else if (!ft_strcmp(cmd->command, "exit")
 			|| !ft_strcmp(cmd->command, "EXIT"))
 			return (ft_exit(cmd));

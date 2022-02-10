@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   ft_lst_size.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fel-boua <fel-boua@student.42.fr>          +#+  +:+       +#+        */
+/*   By: abarchil <abarchil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/30 21:06:48 by abarchil          #+#    #+#             */
-/*   Updated: 2022/01/05 07:18:32 by fel-boua         ###   ########.fr       */
+/*   Updated: 2022/01/13 14:31:09 by abarchil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
 
 int	ft_lstsize(t_cmd *lst)
 {
@@ -27,10 +27,10 @@ int	ft_lstsize(t_cmd *lst)
 	return (size);
 }
 
-int	ft_lstsize_export(t_export *lst)
+int	ft_lstsize_export(t_env *lst)
 {
 	int			size;
-	t_export	*new;
+	t_env		*new;
 
 	new = lst;
 	size = 0;

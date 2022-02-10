@@ -5,19 +5,19 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: abarchil <abarchil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/05 07:16:06 by fel-boua          #+#    #+#             */
-/*   Updated: 2022/01/08 01:37:30 by abarchil         ###   ########.fr       */
+/*   Created: 2022/01/14 20:34:20 by abarchil          #+#    #+#             */
+/*   Updated: 2022/02/10 08:38:38 by abarchil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
 
-char	*get_var(char *var, t_export *export)
+char	*get_var(char *var, t_env *export)
 {
 	while (export)
 	{
-		if (!ft_memcmp(export->variable, var, ft_strlen(var)))
-			return (export->variable);
+		if (!ft_memcmp(export->str, var, ft_strlen(var)))
+			return (export->str);
 		export = export->next;
 	}
 	return (NULL);
@@ -38,51 +38,55 @@ char	*get_var_value(char *variable)
 	return (ft_substr(variable, index, ft_strlen(variable) - index));
 }
 
-static void	check_question_mark(char *arg)
+static void	check_question_mark(t_cmd *cmd, int index)
 {
-	free(arg);
-	arg = ft_itoa(g_tools.exit_status);
-}
-
-static void	dollar_signe(t_cmd *cmd, t_export *export, int index, int count)
-{
-	char	*var;
-	char	*tmp_arg;
-
-	if (ft_strchr(cmd->args[index], DOLLAR_SIGNE))
+	if (cmd->arguments[index][0] == DOLLAR_SIGNE
+		&& cmd->arguments[index][1] == '?' && cmd->arguments[index][2] == '\0')
 	{
-		if (cmd->args[index][0] == DOLLAR_SIGNE && cmd->args[index][1] == '?')
-			check_question_mark(cmd->args[index]);
-		while (cmd->args[index][count]
-			&& cmd->args[index][count] != DOLLAR_SIGNE)
-			count++;
-		if (!cmd->args[index][count])
-			return ;
-		tmp_arg = ft_substr(cmd->args[index], 0, count);
-		var = remchar(get_var_value(get_var
-					(&cmd->args[index][count + 1], export)), '\"');
-		if (!var)
-		{
-			cmd->args[index] = NULL;
-			return (free(tmp_arg));
-		}
-		free(cmd->args[index]);
-		cmd->args[index] = ft_strjoin(tmp_arg, var);
-		free(tmp_arg);
-		free(var);
+		free(cmd->arguments[index]);
+		if (g_tools.exit_status == 127)
+			cmd->arguments[index] = ft_itoa(g_tools.exit_status);
+		else
+			cmd->arguments[index] = ft_itoa(WEXITSTATUS(g_tools.exit_status));
 	}
 }
 
-void	parse_dollar_signe(t_cmd *cmd, t_export *export)
+static void	dollar_signe(t_cmd *cmd, t_env *export, int index, int count)
+{
+	char	*tmp_arg;
+	char	**splited_args;
+	char	**var;
+	int		i;
+
+	i = -1;
+	check_question_mark(cmd, index);
+	count = get_index(cmd->arguments[index], DOLLAR_SIGNE);
+	if (count == -1)
+		return ;
+	tmp_arg = ft_substr(cmd->arguments[index], 0, count);
+	splited_args = ft_split(&cmd->arguments[index][count], DOLLAR_SIGNE);
+	var = (char **)malloc(sizeof(char *) * ft_strlen_2d(splited_args) + 1);
+	if (!var)
+		return (printf("failed allocation"), exit(1));
+	while (splited_args[++i])
+	{
+		var[i] = get_var_value(get_var(splited_args[i], export));
+		if (!var)
+			return (free(tmp_arg), ft_free_env(var));
+	}
+	var[i] = NULL;
+	free_dollar_sign_utils(index, cmd, tmp_arg, var);
+	ft_free_env(splited_args);
+}
+
+void	parse_dollar_signe(t_cmd *cmd, t_env *export)
 {
 	int		index;
-	int		count;
 
-	count = 0;
 	while (cmd)
 	{
 		index = 0;
-		while (cmd->args[++index])
+		while (cmd->arguments[++index])
 			dollar_signe(cmd, export, index, 0);
 		cmd = cmd->next;
 	}

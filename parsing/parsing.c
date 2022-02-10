@@ -3,121 +3,127 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fel-boua <fel-boua@student.42.fr>          +#+  +:+       +#+        */
+/*   By: abarchil <abarchil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/05 07:15:57 by fel-boua          #+#    #+#             */
-/*   Updated: 2022/01/08 02:41:47 by fel-boua         ###   ########.fr       */
+/*   Created: 2022/01/11 10:26:08 by atouhami          #+#    #+#             */
+/*   Updated: 2022/02/07 17:55:53 by abarchil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
 
-t_words	*parsing_word(char *command, t_words *cmds)
+void	free_command(t_cmd *list, t_cmd	*tmp)
 {
-	int		count;
-	int		last_index;
+	int		i;
 
-	count = 0;
-	last_index = count;
-	while (command[count])
+	while (list)
 	{
-		last_index = count;
-		while (command[count] && command[count] != PIPE)
-			count++;
-		ft_lstadd_back_words(&cmds,
-			ft_lstnew_words(ft_substr
-				(command, last_index, count - last_index)));
-		count++;
+		i = 0;
+		tmp = list;
+		if (list->command)
+			free(list->command);
+		free_arguments(list);
+		if (list->files_nb)
+		{
+			while (i < list->files_nb)
+				free(list->files[i++].filename);
+			free(list->files);
+		}
+		free_wildcard(list);
+		list = list->next;
+		free(tmp);
 	}
-	return (cmds);
 }
 
-static void	cmd_init(t_cmd *cmd, int i)
+t_cmd	*cmd_list_create(t_cmd *previous_last)
 {
-	if (cmd->args[i][0] == REDIRECTION_IN
-		|| cmd->args[i][0] == REDIRECTION_OUT
-		|| cmd->args[i][0] == REDIRECTION_OUT_APPEND
-		|| cmd->args[i][0] == HER_DOC)
-	{
-		if (cmd->args[i][0] == REDIRECTION_IN)
-			ft_lstadd_back_file(&cmd->files,
-				ft_lstnew_files(ft_strdup(cmd->args[i + 1]), 2));
-		else if (cmd->args[i][0] == REDIRECTION_OUT)
-			ft_lstadd_back_file(&cmd->files,
-				ft_lstnew_files(ft_strdup(cmd->args[i + 1]), 3));
-		else if (cmd->args[i][0] == REDIRECTION_OUT_APPEND)
-			ft_lstadd_back_file(&cmd->files,
-				ft_lstnew_files(ft_strdup(cmd->args[i + 1]), 4));
-		else if (cmd->args[i][0] == HER_DOC)
-			ft_lstadd_back_file(&cmd->files,
-				ft_lstnew_files(ft_strdup(cmd->args[i + 1]), 5));
-		i++;
-	}
-	if (cmd->args[i][0] == DOUBLE_QUOTES)
-		cmd->args[i] = remchar(cmd->args[i], DOUBLE_QUOTES);
-	if (cmd->args[i][0] == SINGLE_QUOTES)
-		cmd->args[i] = remchar(cmd->args[i], SINGLE_QUOTES);
+	t_cmd	*list;
+
+	list = malloc(sizeof(t_cmd));
+	if (!list)
+		return (printf("failed allocation"), exit(1), NULL);
+	if (previous_last)
+		previous_last->next = list;
+	list->next = NULL;
+	list->previous = previous_last;
+	return (list);
 }
 
-t_cmd	*parse_commands(t_words *words, t_cmd *cmd)
+void	assign_command(int *count_args, int *count_files
+	, t_cmd *cmd, t_tokens *list)
+{
+	cmd->args = NULL;
+	cmd->files = NULL;
+	cmd->command = NULL;
+	*count_args = count_elements(list, STRING) + 1;
+	if (*count_args > 0)
+	{
+		cmd->args = malloc(sizeof(char *) * *count_args + 2);
+		if (!cmd->args)
+			return (printf("failed allocation"), exit(1));
+		cmd->args[*count_args] = NULL;
+	}
+	*count_files = count_elements(list, FILE);
+	if (*count_files > 0)
+	{
+		cmd->files = malloc(sizeof(t_files) * *count_files);
+		if (!cmd->files)
+			return (printf("failed allocation"), exit(1));
+	}
+}
+
+void	fill_command(t_tokens *list, t_cmd *cmd,
+		int count_args, int count_files)
 {
 	int	i;
+	int	f_nb;
 
-	i = -1;
-	cmd = (t_cmd *)malloc(sizeof(t_cmd));
-	if (!cmd)
-		return (NULL);
-	cmd->next = NULL;
-	cmd->files = NULL;
-	cmd->args = ft_split(words->words, DELIMITER);
-	if (!cmd->args[0])
-		return (cmd);
-	if (cmd->args[0][0] > 0)
-		cmd->command = ft_strdup(cmd->args[0]);
-	else if ((cmd->args[0][0] < 0 && cmd->args[0][0] != DELIMITER)
-		&& ft_strlen(words->words) > 1)
-		cmd->command = ft_strdup(cmd->args[2]);
-	while (cmd->args[++i])
-		cmd_init(cmd, i);
-	cmd->args = delete_array(cmd->args);
-	return (cmd);
-}
-
-t_cmd	*parsing(t_words *words, t_cmd *cmd)
-{
-	while (words)
+	assign_command(&count_args, &count_files, cmd, list);
+	set_to_value(&i, &f_nb);
+	cmd->files_nb = count_files;
+	while (list->type != PIPE && list->type != AND && list->next)
 	{
-		ft_lstadd_back_cmd(&cmd, parse_commands(words, cmd));
-		words = words->next;
-	}
-	return (cmd);
-}
-
-char	**delete_array(char **av)
-{
-	int		index;
-	int		tmp_av_index;
-	char	**tmp_av;
-
-	index = 0;
-	tmp_av_index = 0;
-	tmp_av = (char **)malloc(sizeof(char *) * ft_strlen_2d(av) - 1);
-	if (!tmp_av)
-		return (NULL);
-	while (av[index])
-	{
-		if ((av[index][0] < 0 && av[index][0] > -6) && av[index + 2])
-			index += 2;
-		else if ((av[index][0] < 0 && av[index][0] > -6) && !av[index + 2])
-			break ;
-		else
+		fill_cmd_name_wild(list, cmd);
+		if (list->type == STRING)
+				cmd->args[i++] = get_arg(list);
+		if (list->type == FILE)
 		{
-			tmp_av[tmp_av_index] = ft_strdup(av[index]);
-			tmp_av_index++;
-			index++;
+			cmd->files[f_nb].is_double = 0;
+			cmd->files[f_nb].filename = list->filename;
+			cmd->files[f_nb].type = list->previous->redirection_type;
+			if (list->previous->previous->type == REDIRECTION)
+				cmd->files[f_nb].is_double = 1;
+			f_nb++;
+		}
+		list = list-> next;
+	}
+	cmd->arguments = merge_args(cmd->args, cmd->wildcard_arguments);
+}
+
+void	parse_to_command(t_tokens *list, t_cmd *cmd, t_cmd*head)
+{
+	t_pipe	pipe_;
+
+	cmd = cmd_list_create(NULL);
+	head = cmd;
+	while (list->next)
+	{
+		while ((list->type == PIPE || list->type == AND) && list->next)
+			list = list-> next;
+		cmd->wildcard_arguments = NULL;
+		cmd->arguments = NULL;
+		define_next_operation(list, cmd);
+		fill_command(list, cmd, 0, 0);
+		cmd->env = list->env;
+		while (list->type != PIPE && list->type != AND && list->next)
+			list = list-> next;
+		if (list->next)
+		{
+			cmd_list_create(cmd);
+			cmd = cmd->next;
 		}
 	}
-	tmp_av[tmp_av_index] = NULL;
-	ft_free_2d(av);
-	return (tmp_av);
+	parse_dollar_signe(head, cmd->env);
+	ft_execution(&pipe_, head, head->env);
+	free_command(head, NULL);
 }

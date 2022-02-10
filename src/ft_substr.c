@@ -5,33 +5,28 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: abarchil <abarchil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/11/01 19:27:46 by abarchil          #+#    #+#             */
-/*   Updated: 2022/01/02 02:28:03 by abarchil         ###   ########.fr       */
+/*   Created: 2022/02/09 21:06:33 by abarchil          #+#    #+#             */
+/*   Updated: 2022/02/09 21:48:51 by abarchil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
 
-char	*ft_substr(char const *s, size_t start, size_t len)
+char	*ft_substr_2(char const *s, int start, int len)
 {
-	char			*str;
-	char			*res_tab;
-	int				i;
+	char	*s2;
 
-	i = 0;
-	str = (char *)s;
-	if (start >= ft_strlen(str))
-		return (ft_calloc(1, 1));
-	res_tab = (char *)malloc(len + 1);
-	if (!res_tab)
+	if (s == NULL)
 		return (NULL);
-	while (str[start] && len > 0)
-	{
-		res_tab[i] = str[start];
-		start++;
-		i++;
-		len--;
-	}
-	res_tab[i] = '\0';
-	return (res_tab);
+	if (len > ft_strlen(s))
+		len = ft_strlen(s);
+	if (start >= ft_strlen(s))
+		return (ft_strdup(""));
+	s2 = malloc((len + 1) * sizeof(char));
+	if (s2 == NULL)
+		return (printf("failed allocation"), exit(1), NULL);
+	ft_memmove(s2, &s[start], len);
+	s2[len] = '\0';
+	free((char *)s);
+	return (s2);
 }

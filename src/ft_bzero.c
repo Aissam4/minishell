@@ -6,13 +6,13 @@
 /*   By: abarchil <abarchil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/04 21:50:44 by abarchil          #+#    #+#             */
-/*   Updated: 2021/12/19 17:13:00 by abarchil         ###   ########.fr       */
+/*   Updated: 2022/01/13 15:12:33 by abarchil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
 
-void	ft_bzero(void *s, size_t n)
+void	ft_bzero(void *s, int n)
 {
 	ft_memset(s, '\0', n);
 }

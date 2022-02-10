@@ -5,56 +5,89 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: abarchil <abarchil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/07 03:07:05 by abarchil          #+#    #+#             */
-/*   Updated: 2022/01/07 03:31:26 by abarchil         ###   ########.fr       */
+/*   Created: 2022/01/10 18:06:25 by atouhami          #+#    #+#             */
+/*   Updated: 2022/01/13 12:13:31 by abarchil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
 
-void	set_db_quotes(char *command, int **lampe, int count)
+int	verify_errors(char *line)
 {
-	if (lampe[0][2] == 1)
-		lampe[0][2] = 0;
-	else
-		lampe[0][2] = 1;
-	command[count] = DOUBLE_QUOTES;
+	if (!verifiy_quotes(line, '\'', '\"') || !verifiy_quotes(line, '\"', '\''))
+		return (printf("Error : Unterminated quotes\n"), 1);
+	return (0);
 }
 
-void	set_sb_quotes(char *command, int **lampe, int count)
+t_tokens	*list_create(t_tokens *previous_last)
 {
-	if (lampe[0][2] == 1)
-		lampe[0][2] = 0;
-	else
-		lampe[0][2] = 1;
-	command[count] = SINGLE_QUOTES;
+	t_tokens	*list;
+
+	list = malloc(sizeof(t_tokens));
+	if (!list)
+		return (printf("failed allocation"), exit(1), NULL);
+	list->next = NULL;
+	if (previous_last)
+		previous_last->next = list;
+	list->previous = previous_last;
+	return (list);
 }
 
-void	set_here_doc_quotes(char *command, int count)
+int	skip_quotes(char *str, int i, char c)
 {
-	command[count] = HER_DOC;
-	command[count + 1] = HER_DOC;
+	int	j;
+
+	j = 0;
+	while (j != 2 && str[i])
+	{
+		if (str[i] == c && str[i - 1] != '\\')
+			j++;
+		i++;
+	}
+	i--;
+	return (i);
 }
 
-void	set_ro_app_quotes(char *command, int count)
+void	define_type(char *str, int i, t_tokens *list)
 {
-	command[count] = REDIRECTION_OUT_APPEND;
-	command[count + 1] = REDIRECTION_OUT_APPEND;
+	list->redirection_type = 0;
+	list->type = STRING;
+	if ((list->previous == NULL || list->previous->type == PIPE
+			|| list->previous->type == AND))
+		list->type = COMMAND;
+	else if (list->previous->type == REDIRECTION)
+		list->type = FILE;
+	if (str[i] == '|')
+		list->type = PIPE;
+	if (str[i] == '&')
+		list->type = AND;
+	if (str[i] == '*')
+		list->type = WILDCARD;
+	if (str[i] == '>' || str[i] == '<')
+	{
+		list->type = REDIRECTION;
+		if (str[i] == '>')
+			list->redirection_type = 1;
+		else
+			list->redirection_type = 2;
+	}
 }
 
-void	lexing_2(char *command, int count, int **lampe)
+void	fill_infos(char *str, int i, t_tokens *list, t_env *env)
 {
-	if (command[count] == '>' && !lampe[0][1] && !lampe[0][2])
-		command[count] = REDIRECTION_OUT;
-	else if (command[count] == '<' && !lampe[0][1] && !lampe[0][2])
-		command[count] = REDIRECTION_IN;
-	else if ((command[count] == '$' && !lampe[0][1]) ||
-		(command[count] == '$' && !lampe[0][1] && !lampe[0][2]))
-		command[count] = DOLLAR_SIGNE;
-	else if (command[count] == ' ' && !lampe[0][1] && !lampe[0][2])
-		command[count] = DELIMITER;
-	else if (command[count] == '\"')
-		set_db_quotes(command, lampe, count);
-	else if (command[count] == '\'')
-		set_sb_quotes(command, lampe, count);
+	int		start;
+
+	list->env = env;
+	list->str = str;
+	list->lenght = i;
+	start = 0;
+	if (list->type == FILE)
+	{
+		if (str[start] == '\'' || str[start] == '\"')
+		{
+			start++;
+			i--;
+		}
+		list->filename = ft_substr(str, start, i);
+	}
 }

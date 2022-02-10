@@ -3,31 +3,31 @@
 /*                                                        :::      ::::::::   */
 /*   lst_to_array.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fel-boua <fel-boua@student.42.fr>          +#+  +:+       +#+        */
+/*   By: abarchil <abarchil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/05 07:17:17 by fel-boua          #+#    #+#             */
-/*   Updated: 2022/01/05 08:35:32 by fel-boua         ###   ########.fr       */
+/*   Created: 2022/01/13 13:55:35 by abarchil          #+#    #+#             */
+/*   Updated: 2022/01/13 14:29:37 by abarchil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
 
-char	**lst_to_array(t_export *export)
+char	**lst_to_array(t_env *export)
 {
 	int			len;
 	int			index;
 	char		**arr;
-	t_export	*new;
+	t_env		*new;
 
 	index = 0;
 	new = export;
 	len = ft_lstsize_export(export);
 	arr = (char **)malloc(sizeof(char *) * len + 1);
 	if (!arr)
-		return (NULL);
+		return (printf("failed allocation"), exit(1), NULL);
 	while (new)
 	{
-		arr[index] = ft_strdup(new->variable);
+		arr[index] = ft_strdup(new->str);
 		new = new->next;
 		index++;
 	}

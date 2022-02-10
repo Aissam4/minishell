@@ -3,55 +3,81 @@
 /*                                                        :::      ::::::::   */
 /*   ft_itoa.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abarchil <abarchil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: atouhami <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/08/25 21:56:02 by abarchil          #+#    #+#             */
-/*   Updated: 2022/01/04 21:55:53 by abarchil         ###   ########.fr       */
+/*   Created: 2021/11/05 11:14:33 by atouhami          #+#    #+#             */
+/*   Updated: 2021/11/05 16:23:48 by atouhami         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
 
-int	ft_length(int n)
+static char	*ft_strrev(char *str)
 {
-	int	length;
+	int		i;
+	int		c;
+	char	str2[12];
 
-	length = 0;
+	i = ft_strlen(str) - 1;
+	c = 0;
+	while (i >= 0)
+		str2[c++] = str[i--];
+	i = 0;
+	ft_memcpy(str, str2, ft_strlen(str));
+	return (str);
+}
+
+static int	get_lenght_of_int(int n)
+{
+	int	i;
+
+	i = 0;
 	if (n <= 0)
-		length++;
-	while (n != 0)
+		i++;
+	while (n)
 	{
-		length++;
+		i++;
+		n = n / 10;
+	}
+	return (i + 1);
+}
+
+static void	fill_string(char *str, int n)
+{
+	int	i;
+	int	sign;
+
+	i = 0;
+	sign = n;
+	if (n < 0)
+		n = -n;
+	while (n)
+	{
+		str[i] = (n % 10) + 48;
+		i++;
 		n /= 10;
 	}
-	return (length);
+	if (sign < 0)
+		str[i++] = '-';
+	str[i] = '\0';
 }
 
 char	*ft_itoa(int n)
 {
-	char	*s;
-	int		digit_nb;
-	int		null_position;
+	char	*str;
 
-	digit_nb = ft_length(n);
-	null_position = digit_nb;
 	if (n == -2147483648)
 		return (ft_strdup("-2147483648"));
-	s = (char *)malloc(sizeof(char) * digit_nb + 1);
-	if (!s)
-		return (NULL);
+	str = (char *)malloc(get_lenght_of_int(n) * sizeof(char));
+	if (str == NULL)
+		return (printf("failed allocation"), exit(1), NULL);
 	if (n == 0)
-		s[0] = '0';
-	if (n < 0)
 	{
-		s[0] = '-';
-		n *= -1;
+		str[0] = '0';
+		str[1] = '\0';
+		return (str);
 	}
-	while (n > 0)
-	{
-		s[digit_nb-- - 1] = n % 10 + '0';
-		n /= 10;
-	}
-	s[null_position] = '\0';
-	return (s);
+	fill_string(str, n);
+	str = ft_strrev(str);
+	return (str);
 }

@@ -6,11 +6,11 @@
 /*   By: abarchil <abarchil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/05 05:02:29 by abarchil          #+#    #+#             */
-/*   Updated: 2021/12/19 17:09:07 by abarchil         ###   ########.fr       */
+/*   Updated: 2022/01/13 15:09:03 by abarchil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
 
 char	*get_next_line(int fd)
 {

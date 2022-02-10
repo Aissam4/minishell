@@ -6,11 +6,11 @@
 /*   By: abarchil <abarchil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/04 21:51:26 by abarchil          #+#    #+#             */
-/*   Updated: 2022/01/01 08:03:10 by abarchil         ###   ########.fr       */
+/*   Updated: 2022/01/13 15:11:39 by abarchil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
 
 int	ft_isdigit(int c)
 {

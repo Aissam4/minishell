@@ -6,13 +6,13 @@
 /*   By: abarchil <abarchil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/04 21:52:07 by abarchil          #+#    #+#             */
-/*   Updated: 2021/12/19 16:59:38 by abarchil         ###   ########.fr       */
+/*   Updated: 2022/01/13 15:09:52 by abarchil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
 
-int	ft_memcmp(const void *s1, const void *s2, size_t n)
+int	ft_memcmp(const void *s1, const void *s2, int n)
 {
 	unsigned char	*str1;
 	unsigned char	*str2;
